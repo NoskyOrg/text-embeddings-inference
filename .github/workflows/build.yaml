@@ -46,8 +46,6 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.job }}-${{matrix.name}}-${{ github.head_ref || github.run_id }}
       cancel-in-progress: true
-    runs-on:
-      group: aws-highmemory-32-plus-priv
     permissions:
       contents: write
       packages: write
@@ -91,14 +89,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: configure aws credentials
-        id: aws-creds
-        uses: aws-actions/configure-aws-credentials@4fc4975a852c8cd99761e2de1f4ba73402e44dd9
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_GITHUB_BUILDX_CACHE }}
-          role-duration-seconds: 7200
-          aws-region: us-east-1
-          output-credentials: true
+    
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -136,8 +127,6 @@ jobs:
             actions_runtime_token=${{ env.ACTIONS_RUNTIME_TOKEN }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=s3,region=us-east-1,bucket=${{ vars.AWS_S3BUCKET_GITHUB_BUILDX_CACHE }},name=text-embeddings-inference-cache-${{matrix.name}},access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }},secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }},session_token=${{ steps.aws-creds.outputs.aws-session-token }},mode=max
-          cache-to: type=s3,region=us-east-1,bucket=${{ vars.AWS_S3BUCKET_GITHUB_BUILDX_CACHE }},name=text-embeddings-inference-cache-${{matrix.name}},access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }},secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }},session_token=${{ steps.aws-creds.outputs.aws-session-token }},mode=max
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta-grpc
@@ -178,4 +167,4 @@ jobs:
             actions_runtime_token=${{ env.ACTIONS_RUNTIME_TOKEN }}
           tags: ${{ steps.meta-grpc.outputs.tags }}
           labels: ${{ steps.meta-grpc.outputs.labels }}
-          cache-from: type=s3,region=us-east-1,bucket=${{ vars.AWS_S3BUCKET_GITHUB_BUILDX_CACHE }},name=text-embeddings-inference-cache-${{matrix.name}},access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }},secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }},session_token=${{ steps.aws-creds.outputs.aws-session-token }},mode=max
+          
